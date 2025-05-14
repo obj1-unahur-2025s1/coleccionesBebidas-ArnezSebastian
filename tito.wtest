@@ -3,7 +3,7 @@ import tito.*
 describe "test de tito" {
 
     method initialize() {
-        tito.consumir(5,wisky)
+        tito.consumir(5,whisky)
     }
 
     method consumoTerere() {
@@ -29,4 +29,154 @@ describe "test de tito" {
         assert.equals(0,tito.velocidad())
     }
 
+}
+describe "test de licuado:" {
+    test "El licuado inicia con ningún nutriente." {
+        assert.equals([], licuado.nutrientes())
+    }
+    test "Si el licuado no se le agrega ningún valor nutricional, entonces su rendimiento es 0, 
+    sea la cantidad que se tome" {
+      assert.equals(0, licuado.rendimiento(5))
+    }
+    test "si el licuado le preguntamos el rendimiento de tomar 1 litro, tiene que devolver 15" {
+        licuado.agregar(10)
+        licuado.agregar(5)
+        //licuado.rendimiento(1000)
+        assert.equals(15, licuado.rendimiento(1))
+    }
+    test "si consume licuado, tito se vuelve más veloz, teniendo ahora 315 de velocidad (45 del 
+    rendimiento de la bebida multiplicado por 7, de la división entre la inercia base de tito - 
+    490 - por su peso - 70 -.)" {
+        licuado.agregar(10) //la banana tiene 10 nutrientes. El durazno tiene 5 nutrientes
+        licuado.agregar(5)
+        tito.consumir(3, licuado)
+        assert.equals(315, tito.velocidad())
+    }
+}
+
+describe "test del agua saborizada" {
+    test "el agua saborizada tiene un valor inicial de 2 (el valor del agua según cualquier peso y 1 más por el 
+    valor mínimo del terere) al tomar 1 litro" {
+      assert.equals(2, aguaSaborizada.rendimiento(1))
+    }
+    test "al cambiar el valor (bebida) del agua saborizada, este cambia su rendimieto" {
+        aguaSaborizada.saborizarDe(whisky)
+        assert.equals(1.9, aguaSaborizada.rendimiento(1))
+    }
+    test "Cuando tito toma 2 litros del agua saborizada con un licuado sin nutrientes (implicando 2 * 0), dando 1 de 
+    rendimiento, este aumenta su velocidad en 7" {
+      aguaSaborizada.saborizarDe(licuado)
+      tito.consumir(2, aguaSaborizada)
+      assert.equals(7, tito.velocidad())
+    }
+}
+
+describe "test del coctel suave" {
+    test "El coctel suave tiene 2 bebidas a primera instancia, el whisky y el terere" {
+      assert.equals([whisky, terere], coctelSuave.bebidas())
+    }
+    test "la cantidad de bebidas que tiene el coctel suave inicialmente es de 2" {
+      assert.equals(2, coctelSuave.cantidadDeBebidas())
+    }
+    test "el coctel suave tiene un rendimiento según la sumatoria de todos los rendimientos de 
+    las bebidas que la componen, las cuales son el terere y el wisky en una cantidad determinada 
+    por el mismo coctel, en este caso, 2 litros, siendo el rendimiento de este de 1.81 (1 por 
+    la cantidad mínima del rendimiento del terere, y 0.81 del whisky)"{
+        assert.equals(1.81, coctelSuave.rendimiento(2))
+    }
+    test "el coctel puede agregar más bebidas" {
+        coctelSuave.agregarBebida(cianuro)
+        coctelSuave.agregarBebida(licuado)
+        assert.equals([whisky, terere, cianuro, licuado], coctelSuave.bebidas())       
+    }
+    test "Al agregarle más bebidas, este aumenta su rendimiento, dando 1.9 (0.9 por el whisky, 
+    1 por el valor mínimo del terere, 0 por el valor del licuado y 0 por el cianuro)" {
+        coctelSuave.agregarBebida(cianuro)
+        coctelSuave.agregarBebida(licuado)
+        assert.equals(1.9, coctelSuave.rendimiento(1))
+    }
+    test "Si se modifica el valor nutricional (rendimiento) del licuado estando ya dentro del 
+    coctel, este modifica su rendimiento actual (ahora es 13.9)" {
+        coctelSuave.agregarBebida(licuado) //se agrega al licuado con un rendimiento de 0.
+        licuado.agregar(10)
+        licuado.agregar(2) //su rendimiento es de 12 por litro
+        assert.equals(13.9, coctelSuave.rendimiento(1)) //se actualiza su valor, debido a que cada que se pregunta su rendimiento, este se actualiza al actual.
+    }
+    test "el coctel es capaz de eliminar bebidas" {
+        coctelSuave.sacarBebida(whisky)
+        assert.equals([terere], coctelSuave.bebidas())
+    }
+    test "Al sacar una bebida del coctel, el valor del rendimiento baja" {
+        coctelSuave.sacarBebida(whisky)
+        assert.equals(1, coctelSuave.rendimiento(3))
+    }
+    test "Al consumir 3 litros del coctel suave, el cual contiene terere y licuado de 20 de 
+    rendimiento, dando un total de 61 de rendimiento, tito aumenta su velocidad a 427" {
+        licuado.agregar(20)
+        coctelSuave.sacarBebida(whisky)
+        coctelSuave.agregarBebida(licuado)
+        tito.consumir(3, coctelSuave)
+        assert.equals(427, tito.velocidad())
+    }
+}
+
+describe "Grupo de testeos del coctel común" {
+  test "el coctel común inicia con las bebidas de whisky y terere" {
+    assert.equals([whisky, terere], coctel.bebidas())
+  }
+  test "el coctel comienza con una cantidad de 2 bebidas" {
+    assert.equals(2, coctel.cantidadDeBebidas())
+  }
+  test "el coctel inicia con un rendimiento de 0.9 por litro (rendimiento del whiksy * 
+  rendimiento del terere)" {
+    assert.equals(0.9, coctel.rendimiento(1))
+  }
+  test "el coctel puede agregar más bebidas, haciendo que su rendimiento pase a ser mayor, en 
+  este caso, agrega un licuado de 10 de rendimiento, haciendo que su rendimiento pasa a ser 
+  9 por litro." {
+    coctel.agregarBebida(licuado)
+    licuado.agregar(10)
+    assert.equals(9, coctel.rendimiento(1))
+  }
+  test "el coctel puede eliminar bebidas, haciendo que su rendimiento pase a ser menor, en 
+  este caso, saca el whisky y hace que su rendimiento pase a ser 1 por litro." {
+    coctel.sacarBebida(whisky)
+    assert.equals(1, coctel.rendimiento(1))
+  }
+  test "el coctel puede agregar un agua saborizada con whisky teniendo el whisky ya en su haber, 
+  haciendo que su rendimiento pase a ser 1.71 por litro (sólo si dicha agua ya está saborizada 
+  con dicha bebida antes de haberse incluido al mismo)" {
+    aguaSaborizada.saborizarDe(whisky)
+    coctel.agregarBebida(aguaSaborizada)
+    assert.equals(1.71, coctel.rendimiento(1))
+  }
+  /* Un coctel no puede agregar una bebida que tenga a su vez el mismo coctel, genera una infinita actualización de datos
+  test "el coctel puede agregar un agua saborizada con coctel, haciendo que su rendimiento pase a 
+  ser 1.71 por litro (con la misma condición antes mencionada)" {
+    aguaSaborizada.saborizarDe(coctel)
+    coctel.agregarBebida(aguaSaborizada)
+    assert.equals(1.71, coctel.rendimiento(1))
+  }
+  test "al consumir 2 litros de coctel, el cual contiene 0.9 de rendimiento del whisky, 1 de 
+  rendimiento del terere, 15 de rendimiento del licuado, y un agua saborizada de coctel, el cual 
+  vale 13.5, teniendo un valor total de rendimiento de 182.25 por litro, dando 364.5 este hace 
+  que tito aumente su velocidad a 2551.5" {
+    coctel.agregarBebida(licuado)
+    licuado.agregar(10)
+    licuado.agregar(5)
+    aguaSaborizada.saborizarDe(coctel)
+    coctel.agregarBebida(aguaSaborizada)
+    tito.consumir(2, coctel)
+    assert.equals(2551.5, coctel.rendimiento(1))
+  }
+  */
+  test "al consumir 2 litros de coctel, el cual contiene 0.81 de rendimiento del whisky, 1 de 
+  rendimiento del terere, 15 de rendimiento del licuado, teniendo un valor total de rendimiento 
+  de 12.15 por litro, dando 24.3, este hace que tito aumente su velocidad a 170.1." {
+    licuado.agregar(10)
+    licuado.agregar(5)
+    coctel.agregarBebida(licuado)
+    tito.consumir(2, coctel)
+    assert.equals(170.1, tito.velocidad())
+  }
 }
